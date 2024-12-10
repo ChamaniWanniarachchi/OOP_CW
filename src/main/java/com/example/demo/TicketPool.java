@@ -8,22 +8,55 @@ import java.util.Queue;
 @Component
 public class TicketPool {
     private final Queue<String> tickets = new LinkedList<>();
+    private final Object lock = new Object(); // Synchronization lock
 
-    public synchronized void addTickets(int count) {
-        for (int i = 0; i < count; i++) {
-            tickets.add("Ticket-" + System.nanoTime());
+    // Add tickets to the pool with capacity check
+    public void addTickets(int totalTickets, int maxCapacity) {
+        synchronized (lock) {
+            while (isFull(maxCapacity)) {
+                try {
+                    lock.wait(); // Wait until there is space in the pool
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            for (int i = 0; i < totalTickets; i++) {
+                if (!isFull(maxCapacity)) {
+                    tickets.add("Ticket-" + System.nanoTime());
+                }
+            }
+            System.out.println("Vendor added " + totalTickets + " tickets.");
+            lock.notifyAll(); // Notify consumers
         }
     }
 
-    public synchronized String removeTicket() {
-        return tickets.poll();
+    // Remove a ticket from the pool
+    public String removeTicket() {
+        synchronized (lock) {
+            while (tickets.isEmpty()) {
+                try {
+                    lock.wait(); // Wait until tickets are available
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            String ticket = tickets.poll();
+            lock.notifyAll(); // Notify producers
+            return ticket;
+        }
     }
 
-    public synchronized int getTicketCount() {
-        return tickets.size();
+    // Get the current ticket count
+    public int getTicketCount() {
+        synchronized (lock) {
+            return tickets.size();
+        }
     }
 
-    public synchronized boolean isFull(int maxCapacity) {
-        return tickets.size() >= maxCapacity;
+    // Check if the pool is full
+    public boolean isFull(int maxCapacity) {
+        synchronized (lock) {
+            return tickets.size() >= maxCapacity;
+        }
     }
 }

@@ -14,17 +14,11 @@ public class Vendor implements Runnable{
     @Override
     public void run() {
         while (true) {
-            synchronized (ticketPool) {
-                if (!ticketPool.isFull(maxCapacity)) {
-                    ticketPool.addTickets(releaseRate);
-                    System.out.println("Vendor added " + releaseRate + " tickets.");
-                }
-            }
+            ticketPool.addTickets(releaseRate, maxCapacity);
             try {
-                Thread.sleep(1000); // Simulate a delay
+                Thread.sleep(5000); // Simulate vendor restocking
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                break;
             }
         }
     }

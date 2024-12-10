@@ -10,19 +10,14 @@ public class Customer implements Runnable{
     @Override
     public void run() {
         while (true) {
-            synchronized (ticketPool) {
-                String ticket = ticketPool.removeTicket();
-                if (ticket != null) {
-                    System.out.println("Customer purchased: " + ticket);
-                } else {
-                    System.out.println("No tickets available.");
-                }
+            String ticket = ticketPool.removeTicket();
+            if (ticket != null) {
+                System.out.println(Thread.currentThread().getName() + " purchased: " + ticket);
             }
             try {
-                Thread.sleep(500); // Simulate a delay
+                Thread.sleep(1000); // Simulate customer buying interval
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                break;
             }
         }
     }
