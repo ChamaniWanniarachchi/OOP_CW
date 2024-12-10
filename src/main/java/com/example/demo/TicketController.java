@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api")
 public class TicketController {
     @Autowired
